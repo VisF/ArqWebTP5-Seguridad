@@ -14,6 +14,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin
@@ -70,14 +72,18 @@ public class AuthController {
     }
 
     @PostMapping("/validate")
-    public ResponseEntity<?> validateToken(@RequestBody String token, String username) {
-        //String token = tokenRequest.getToken();
+    public ResponseEntity<?> validateToken(@RequestBody Map<String, String> tokenRequest) {
+        //Extraer el token del JSON
+        String token = tokenRequest.get("token");
+        if (token == null || token.isEmpty()) {
+            return ResponseEntity.badRequest().body("Token is required");
+        }
+        //Validar el token
         boolean isValid = jwtUtil.validateToken(token);
         if (isValid) {
-            //String username = jwtUtil.extractUsername(token);
-            return ResponseEntity.ok(username);
+            return ResponseEntity.ok("token is valid");
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(token);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
         }
     }
 }
